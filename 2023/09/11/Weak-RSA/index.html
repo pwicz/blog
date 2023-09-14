@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <meta name="author" content="Piotr Politowicz">
+
+
+
+
+
+<title>Weak RSA | Pwicz Blog</title>
+
+
+
+<link rel="icon" href="/favicon.png">
+
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/nprogress/nprogress.css">
+
+
+
+<script src="/lib/jquery.min.js"></script>
+
+
+<script src="/lib/iconify-icon.min.js"></script>
+
+
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+  };
+</script>
+
+
+<script src="/lib/nprogress/nprogress.js"></script>
+
+<script>
+  $(document).ready(() => {
+    NProgress.configure({
+      showSpinner: false,
+    });
+    NProgress.start();
+    $("#nprogress .bar").css({
+      background: "#FF4C29",
+    });
+    $("#nprogress .peg").css({
+      "box-shadow": "0 0 2px #FF4C29, 0 0 4px #FF4C29",
+    });
+    $("#nprogress .spinner-icon").css({
+      "border-top-color": "#FF4C29",
+      "border-left-color": "#FF4C29",
+    });
+    setTimeout(function () {
+      NProgress.done();
+      $(".fade").removeClass("out");
+    }, 800);
+  });
+</script>
+
+<script>
+  (function () {
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+    if (setting === "dark" || (prefersDark && setting !== "light"))
+      document.documentElement.classList.toggle("dark", true);
+    let isDark = document.documentElement.classList.contains("dark");
+  })();
+
+  $(document).ready(function () {
+    // init icon
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = document.documentElement.classList.contains("dark");
+    $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+
+    function toggleGiscusTheme() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const giscusFrame = document.querySelector("iframe.giscus-frame");
+      if (giscusFrame) {
+        giscusFrame.contentWindow.postMessage(
+          {
+            giscus: {
+              setConfig: {
+                theme: isDark ? "dark" : "light",
+              },
+            },
+          },
+          "https://giscus.app"
+        );
+      }
+    }
+
+
+    // toggle dark mode
+    function toggleDark() {
+      let isDark = document.documentElement.classList.contains("dark");
+      isDark = !isDark;
+      const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+      document.documentElement.classList.toggle("dark", isDark);
+      $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+      if (prefersDark === isDark) {
+        localStorage.setItem("hexo-color-scheme", "auto");
+      } else {
+        localStorage.setItem("hexo-color-scheme", isDark ? "dark" : "light");
+      }
+      toggleGiscusTheme();
+    }
+    $("#toggle-dark").click(toggleDark);
+    // listen dark mode change
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+        if (setting === "auto") {
+          document.documentElement.classList.toggle("dark", e.matches);
+          $("#theme-icon").attr(
+            "icon",
+            e.matches ? "ri:moon-line" : "ri:sun-line"
+          );
+          toggleGiscusTheme();
+        }
+      });
+  });
+</script>
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body class="font-sans bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-200">
+  <header
+  class="fixed w-full px-5 py-1 z-10 backdrop-blur-xl backdrop-saturate-150 border-b border-black/5"
+>
+  <div class="max-auto">
+    <nav class="flex items-center text-base">
+      <a href="/" class="group">
+        <h2 class="font-medium tracking-tighterp text-l p-2">
+          <img
+            class="w-5 mr-2 inline-block transition-transform group-hover:rotate-[30deg]"
+            style="filter: invert(49%) sepia(99%) saturate(2270%) hue-rotate(334deg) brightness(91%) contrast(126%);"
+            id="logo"
+            src="/images/fox.svg"
+            alt="Pwicz Blog"
+          />
+          Pwicz Blog
+        </h2>
+      </a>
+      <div
+        id="header-title"
+        class="opacity-0 md:ml-2 md:mt-[0.1rem] text-xs font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
+      >
+        Weak RSA
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        
+        <a class="hidden sm:flex" href="/archives"
+          >Posts</a
+        >
+        
+        <a class="hidden sm:flex" href="/category"
+          >Categories</a
+        >
+        
+        <a class="hidden sm:flex" href="/tag"
+          >Tags</a
+        >
+          
+        <a
+          class="w-5 h-5 hidden sm:flex"
+          title="Github"
+          target="_blank" rel="noopener" href="https://github.com/pwicz"
+        >
+          <iconify-icon
+            width="20"
+            icon="ri:github-line"
+          ></iconify-icon>
+        </a>
+        
+        <a
+          class="w-5 h-5 hidden sm:flex"
+          title="Twitter"
+          target="_blank" rel="noopener" href="https://twitter.com/pwicz1"
+        >
+          <iconify-icon
+            width="20"
+            icon="ri:twitter-line"
+          ></iconify-icon>
+        </a>
+         
+        <a class="w-5 h-5" title="toggle theme" id="toggle-dark">
+          <iconify-icon width="20" icon="" id="theme-icon"></iconify-icon>
+        </a>
+      </div>
+      <div class="flex items-center justify-center gap-3 ml-3 sm:hidden">
+        <span class="w-5 h-5" aria-hidden="true" role="img" id="open-menu">
+          <iconify-icon width="20" icon="carbon:menu"></iconify-icon>
+        </span>
+        <span
+          class="w-5 h-5 hidden"
+          aria-hidden="true"
+          role="img"
+          id="close-menu"
+        >
+          <iconify-icon width="20" icon="carbon:close"></iconify-icon>
+        </span>
+      </div>
+    </nav>
+  </div>
+</header>
+<div
+  id="menu-panel"
+  class="h-0 overflow-hidden sm:hidden fixed left-0 right-0 top-12 bottom-0 z-10"
+>
+  <div
+    id="menu-content"
+    class="relative z-20 bg-white/80 dark:bg-black/5 px-6 sm:px-8 py-2 backdrop-blur-xl -translate-y-full transition-transform duration-300"
+  >
+    <ul class="nav flex flex-col sm:flex-row text-sm font-medium">
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/archives"
+          class="flex h-12 sm:h-auto items-center"
+          >Posts</a
+        >
+      </li>
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/category"
+          class="flex h-12 sm:h-auto items-center"
+          >Categories</a
+        >
+      </li>
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/tag"
+          class="flex h-12 sm:h-auto items-center"
+          >Tags</a
+        >
+      </li>
+      
+    </ul>
+  </div>
+  <div class="mask bg-black/20 absolute inset-0"></div>
+</div>
+
+  <main class="p-12">
+    <!-- css -->
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.min.css">
+ 
+<link rel="stylesheet" href="/lib/tocbot/tocbot.min.css">
+
+<!-- toc -->
+ <!-- tocbot -->
+<nav class="post-toc toc text-sm w-48 relative top-32 right-0 opacity-70 hidden lg:block" style="position: fixed !important;"></nav>
+ 
+<section class="px-6 max-w-prose mx-auto md:px-0">
+  <!-- header -->
+  <header class="overflow-hidden pt-6 pb-6 md:pt-12">
+    <div class="pt-4 md:pt-6">
+      <h1
+        id="article-title"
+        class="text-[2rem] font-bold leading-snug mb-4 md:mb-6 md:text-[2.6rem]"
+      >
+        Weak RSA
+      </h1>
+      <p class="mb-6"></p>
+      <div>
+        <section class="flex items-center gap-3 text-sm">
+          <time>2023-09-14 23:57:18</time>
+          <span class="text-gray-400">·</span>
+          <span>7 min</span>
+          <span class="text-gray-400">·</span>
+          <span>1.2k words</span>
+        </section>
+      </div>
+    </div>
+  </header>
+  <!-- content -->
+  <article class="post-content mt-10 prose dark:prose-invert post-content">
+    <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>This is one of the beginner’s HTB challenges. You can find it <a target="_blank" rel="noopener" href="https://app.hackthebox.com/challenges/6">here</a>.<br>It is a good challenge to make sure you understand the math behind RSA ;)</p>
+<h2 id="0-RSA-and-why-it-can-be-weak"><a href="#0-RSA-and-why-it-can-be-weak" class="headerlink" title="0. RSA and why it can be weak"></a>0. RSA and why it can be weak</h2><h3 id="RSA-in-a-nutshell"><a href="#RSA-in-a-nutshell" class="headerlink" title="RSA in a nutshell"></a>RSA in a nutshell</h3><p>RSA is a public-key cryptosystem, an asymmetric encryption, which means it uses two separate (but connected!) keys for encryption and decryption. The encryption key also known as the public key is as its name suggests - public. People use it to encrypt messages and send them to the owner of the key. The owner has the other part of the story: the decryption key which is private. It is used to decrypt messages and so it cannot be exposed to the public. In this challenge, we are given a public key from which we have to derive its other, private part. With a strong key it is computationally infeasible - you cannot break it. However, when the numbers behind the public key are weak - we can break it, and this is what we are going to do.</p>
+<h3 id="What-numbers"><a href="#What-numbers" class="headerlink" title="What numbers?"></a>What numbers?</h3><p>RSA strength or weakness that we are going to exploit in this challenge is based on the prime factorization problem. To put it simple, given a large number <code>n</code>, it is very very difficult to find prime numbers that multiplied together give <code>n</code>: $p*q &#x3D; n$. However, when <code>n</code> is not large, it is doable and from these primes you can obtain the public key.</p>
+<p>When creating a key pair, we choose two large prime numbers <code>p</code> and <code>q</code>. <code>p and q</code> give us the modulus <code>n</code>: $n &#x3D; p * q$. We choose the public (encryption) component <code>e</code> and its inverse <code>d</code> modulo $\phi(n)$. In this case, since $n &#x3D; p * q$ and <code>p and q</code> are prime numbers, $\phi(n) &#x3D; (p - 1) * (q - 1)$. Check out the <a target="_blank" rel="noopener" href="https://www.whitman.edu/mathematics/higher_math_online/section03.08.html">Euler Phi Function</a> if you want to learn the math behind it. It is worth knowing why!</p>
+<p>Having chosen the numbers, we end up with: <code>p, q, n, e, and d</code>. <code>n and e</code> will be given in the public key. Let’s say you have a message <code>M</code>. The encrypted message <code>C</code> (ciphertext) will be $C &#x3D; M^e \bmod n$. The owner of the key will decrypt it using the private component <code>d</code>: $M &#x3D; C^d \bmod n$. To get <code>d</code> from the <code>e and n</code> we have to find the <code>p and q</code> which multiplied together give <code>n</code>. Then, <code>p and q</code> can be used to obtain $\phi(n)$ and from there it is easy to calculate the inverse of <code>e</code> which is <code>d</code>. This is how we are going to break this encryption.</p>
+<h2 id="1-Extracting-data-from-the-public-key"><a href="#1-Extracting-data-from-the-public-key" class="headerlink" title="1. Extracting data from the public key"></a>1. Extracting data from the public key</h2><p>We know that they public key is composed of numbers n and e which we use to encrypt the message. However, after opening key.pub we realize that these numbers are encoded. Specifically, it is PEM-encoded (Privacy Enhanced Mail format).<br>To extract n and e, you can use many of the useful websites such as dcode.fr and their certificate reader:</p>
+<p><img src="https://i.imgur.com/ykiXGCg.png"></p>
+<p>or you can use a tool called <a href="ehttps://www.openssl.org/docs/man3.0/man1/openssl-asn1parse.html">openssl-asn1pars</a>.</p>
+<p>I wanted to try to extract the values with the asn1parse (ASN.1 being the language used to define data structures) and this is what I received when running it on the key.pub:<br><img src="https://i.imgur.com/dABiDY4.png"></p>
+<p>The important part here is the BIT STRING element which represents the actual public key data. To fruther extract it from the element, we use this command (numbers are stripped on the right):<br><img src="https://i.imgur.com/FEk0gEb.png"></p>
+<p>The <code>-strparse</code> is used to here to indicate that we want to parse contents of the ASN.1 object starting at offset 19. The result are the hexadecimal representations of n and e.</p>
+<h2 id="2-Prime-factorization"><a href="#2-Prime-factorization" class="headerlink" title="2. Prime factorization"></a>2. Prime factorization</h2><p>So, what do we need to get the private key? Two prime numbers that make up n. Therefore, we need to factorize n. This operation is computationally infeasible for large numbers, but in our case n is relatively small. Let us use dcode.fr again and their <a target="_blank" rel="noopener" href="https://www.dcode.fr/prime-factors-decomposition">Prime Numbers Decomposition</a> tool. </p>
+<p>It is pretty quick as in about 2 seconds we can see our two primes in the section of the website to the left<br><img src="https://i.imgur.com/ANyuxO0.png"><br>As you can imagine, this should take the attacker thousands of years, not 2 seconds…</p>
+<h2 id="3-Private-key-creation"><a href="#3-Private-key-creation" class="headerlink" title="3. Private key creation"></a>3. Private key creation</h2><p>Given <code>p, q, and e</code>, we will now find the inverse of <code>e</code> modulo $\phi(n)$ (where $\phi(n) &#x3D; (p-1)*(q-1)$) which is <code>d</code>. This is enough to create the private key and decrypt the message. I created a simple Python script for that:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> Crypto.PublicKey <span class="keyword">import</span> RSA</span><br><span class="line"><span class="keyword">from</span> Crypto.Cipher <span class="keyword">import</span> PKCS1_OAEP</span><br><span class="line"></span><br><span class="line">MODULUS = <span class="number">0x03303B</span>...</span><br><span class="line"><span class="comment"># PUB_COMP is `e`</span></span><br><span class="line">PUB_COMP = <span class="number">0x6117C</span>...</span><br><span class="line"></span><br><span class="line">P = <span class="number">204234.</span>..</span><br><span class="line">Q = <span class="number">280647.</span>..</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decode</span>():</span><br><span class="line">    <span class="comment"># get the inverse of the public component modulo phi of n</span></span><br><span class="line">    PRIV_COMP = <span class="built_in">pow</span>(PUB_COMP, -<span class="number">1</span>, (P - <span class="number">1</span>) * (Q - <span class="number">1</span>))</span><br><span class="line">    key = RSA.construct((MODULUS, PUB_COMP, PRIV_COMP))</span><br><span class="line">    cipher = PKCS1_OAEP.new(key)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># read the challenge file</span></span><br><span class="line">    file = <span class="built_in">open</span>(<span class="string">&#x27;flag.enc&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>)</span><br><span class="line">    content = file.read()</span><br><span class="line">    file.close()</span><br><span class="line"></span><br><span class="line">    answer = cipher.decrypt(content)</span><br><span class="line">    <span class="built_in">print</span>(answer)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>We use the <a target="_blank" rel="noopener" href="https://pycryptodome.readthedocs.io/">PyCryptodome</a> to manually create the key from our components and use it to decrypt the cipher. It should work but… it does not! <code>cipher.decrypt()</code> throws a <code>ValueError: Incorrect decryption</code> exception. The possible reasons are two: the key components are wrong or the ciphertext is not structured properly.</p>
+<h2 id="4-RSA-key-padding"><a href="#4-RSA-key-padding" class="headerlink" title="4. RSA key padding"></a>4. RSA key padding</h2><p>After ensuring that my numbers are correct (with assertions as demonstrated in the updated snippet), I looked up what <code>PKCS1_OAEP</code> actually is. It is an asymmetric cipher based on RSA with the OAEP padding. Why do we need padding? To encrypt the message, it gets divided into blocks and very often the last block will not be of ideal size - to make it of ideal size we append some padding to it. To keep it short, there are two paddings: OAEP which I assumed is used in this ciphertext and PKCS#v1.5. You can read more about it in <a target="_blank" rel="noopener" href="https://medium.com/asecuritysite-when-bob-met-alice/so-how-does-padding-work-in-rsa-6b34a123ca1f">this article</a>.</p>
+<p>So, I tried using another (legacy) module that decrypts the cipher text with the other padding. This is the updated code:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> Crypto.PublicKey <span class="keyword">import</span> RSA</span><br><span class="line"><span class="comment"># note that this import has changed!</span></span><br><span class="line"><span class="keyword">from</span> Crypto.Cipher <span class="keyword">import</span> PKCS1_v1_5</span><br><span class="line"></span><br><span class="line">MODULUS = <span class="number">0x03303B</span>...</span><br><span class="line"><span class="comment"># PUB_COMP is `e`</span></span><br><span class="line">PUB_COMP = <span class="number">0x6117C</span>...</span><br><span class="line"></span><br><span class="line">P = <span class="number">204234.</span>..</span><br><span class="line">Q = <span class="number">280647.</span>..</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decode</span>():</span><br><span class="line">    <span class="comment"># check correctness of the numbers</span></span><br><span class="line">    pub = RSA.importKey(<span class="built_in">open</span>(<span class="string">&quot;key.pub&quot;</span>).read())</span><br><span class="line">    <span class="keyword">assert</span>(pub.n == MODULUS)</span><br><span class="line">    <span class="keyword">assert</span>(pub.e == PUB_COMP)</span><br><span class="line">    <span class="keyword">assert</span>(P*Q == pub.n)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># get the inverse of the public component modulo phi of n</span></span><br><span class="line">    PRIV_COMP = <span class="built_in">pow</span>(PUB_COMP, -<span class="number">1</span>, (P - <span class="number">1</span>) * (Q - <span class="number">1</span>))</span><br><span class="line">    key = RSA.construct((MODULUS, PUB_COMP, PRIV_COMP))</span><br><span class="line">    cipher = PKCS1_v1_5.new(key)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># read the challenge file</span></span><br><span class="line">    file = <span class="built_in">open</span>(<span class="string">&#x27;flag.enc&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>)</span><br><span class="line">    content = file.read()</span><br><span class="line">    file.close()</span><br><span class="line"></span><br><span class="line">    answer = cipher.decrypt(content, <span class="string">&#x27;argh&#x27;</span>)</span><br><span class="line">    <span class="built_in">print</span>(answer)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-It-worked"><a href="#5-It-worked" class="headerlink" title="5. It worked!"></a>5. It worked!</h2><p>It was enough to decrypt the message. I enjoyed this challenge as this was my first time manually breaking encryption as opposed to just using some tools. Even though it is simple, it is a good way to put theory into practice.</p>
+
+  </article>
+  <!-- tag -->
+  
+  <div class="mt-12 pt-6 border-t border-gray-200">
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/HTB/">HTB</a>
+    </span>
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/Cryptography/">Cryptography</a>
+    </span>
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/RSA/">RSA</a>
+    </span>
+    
+  </div>
+  
+  <!-- prev and next -->
+  <div class="flex justify-between mt-6 pt-6 border-t border-gray-200">
+    <div>
+      
+    </div>
+    <div>
+      
+    </div>
+  </div>
+  <!-- comment -->
+  <div class="article-comments mt-12">
+</div>
+</section>
+<!-- js inspect -->
+
+<script src="/lib/clipboard.min.js"></script>
+ 
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+  });
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+ 
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  $(document).ready(() => {
+    const maraidConfig = {
+      theme: "dark",
+      logLevel: 3,
+      flowchart: { curve: "linear" },
+      gantt: { axisFormat: "%m/%d/%Y" },
+      sequence: { actorMargin: 50 },
+    };
+    mermaid.initialize(maraidConfig);
+  });
+</script>
+
+ 
+<script src="/lib/fancybox/fancybox.umd.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+    $('.post-content').each(function(i){
+      $(this).find('img').each(function(){
+        if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
+        var alt = this.alt;
+        if (alt) $(this).after('<span class="fancybox-alt">' + alt + '</span>');
+        $(this).wrap('<a class="fancybox-img" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
+      });
+      $(this).find('.fancybox').each(function(){
+        $(this).attr('rel', 'article' + i);
+      });
+    });
+
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        // options
+    })
+  })
+</script>
+ <!-- tocbot begin -->
+
+<script src="/lib/tocbot/tocbot.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+      tocbot.init({
+        // Where to render the table of contents.
+        tocSelector: '.post-toc',
+        // Where to grab the headings to build the table of contents.
+        contentSelector: '.post-content',
+        // Which headings to grab inside of the contentSelector element.
+        headingSelector: 'h1, h2, h3',
+        // For headings inside relative or absolute positioned containers within content.
+        hasInnerContainers: true,
+    });
+  })
+</script>
+<!-- tocbot end -->
+
+
+  </main>
+  <footer
+  class="flex flex-col h-40 items-center justify-center text-gray-400 text-sm"
+>
+  <!-- busuanzi -->
+  <!-- 
+ -->
+  <!-- copyright -->
+  <div class="flex items-center gap-2">
+    <span>© 2023 </span>
+    <a href="https://github.com/pwicz" target="_blank" rel="noopener noreferrer"
+      >pwicz</a
+    >
+  </div>
+  <!-- powered by -->
+  <div class="flex items-center gap-2">
+    <span>Powered by</span>
+    <a href="https://hexo.io/" target="_blank" rel="noopener noreferrer"
+      >Hexo</a
+    >
+    <span>&</span>
+    <a
+      href="https://github.com/xbmlz/hexo-theme-maple"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Maple</a
+    >
+  </div>
+</footer>
+
+  <iconify-icon class="fixed right-4 bottom-10 z-100 opacity-0" width="24" icon="ion:arrow-up-c" id="go-top"></iconify-icon>
+  
+<script src="/js/main.js"></script>
+ 
+
+
+  <div class="w-screen h-screen -z-999" id="maple"></div>
+</body>
+
+</html>
