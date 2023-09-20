@@ -292,7 +292,7 @@
       <p class="mb-6"></p>
       <div>
         <section class="flex items-center gap-3 text-sm">
-          <time>2023-09-14 23:57:18</time>
+          <time>2023-09-21 01:17:21</time>
           <span class="text-gray-400">·</span>
           <span>7 min</span>
           <span class="text-gray-400">·</span>
@@ -314,6 +314,9 @@
 <p>I wanted to try to extract the values with the asn1parse (ASN.1 being the language used to define data structures) and this is what I received when running it on the key.pub:<br><img src="https://i.imgur.com/dABiDY4.png"></p>
 <p>The important part here is the BIT STRING element which represents the actual public key data. To fruther extract it from the element, we use this command (numbers are stripped on the right):<br><img src="https://i.imgur.com/FEk0gEb.png"></p>
 <p>The <code>-strparse</code> is used to here to indicate that we want to parse contents of the ASN.1 object starting at offset 19. The result are the hexadecimal representations of n and e.</p>
+<h3 id="1-1-Perhaps-a-cleaner-way"><a href="#1-1-Perhaps-a-cleaner-way" class="headerlink" title="1.1 Perhaps a cleaner way"></a>1.1 Perhaps a cleaner way</h3><p>When going through the new Security Engineer path on TryHackMe, I found this command that allows you to extract data about the key in an even easier and more readable way:</p>
+<p><img src="https://i.imgur.com/vhrftY6.png"></p>
+<p>I find it funny that I came across it only now. You can read the private key in the same way, just omit the <code>-pubin</code> flag that specifies that a public key is read.</p>
 <h2 id="2-Prime-factorization"><a href="#2-Prime-factorization" class="headerlink" title="2. Prime factorization"></a>2. Prime factorization</h2><p>So, what do we need to get the private key? Two prime numbers that make up n. Therefore, we need to factorize n. This operation is computationally infeasible for large numbers, but in our case n is relatively small. Let us use dcode.fr again and their <a target="_blank" rel="noopener" href="https://www.dcode.fr/prime-factors-decomposition">Prime Numbers Decomposition</a> tool. </p>
 <p>It is pretty quick as in about 2 seconds we can see our two primes in the section of the website to the left<br><img src="https://i.imgur.com/ANyuxO0.png"><br>As you can imagine, this should take the attacker thousands of years, not 2 seconds…</p>
 <h2 id="3-Private-key-creation"><a href="#3-Private-key-creation" class="headerlink" title="3. Private key creation"></a>3. Private key creation</h2><p>Given <code>p, q, and e</code>, we will now find the inverse of <code>e</code> modulo $\phi(n)$ (where $\phi(n) &#x3D; (p-1)*(q-1)$) which is <code>d</code>. This is enough to create the private key and decrypt the message. I created a simple Python script for that:</p>
